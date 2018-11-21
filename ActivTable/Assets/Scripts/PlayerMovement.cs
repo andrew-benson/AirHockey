@@ -2,24 +2,36 @@
 
 public class PlayerMovement : MonoBehaviour
 {
+    public enum PlayerNumber
+    {
+        Player1,
+        Player2
+    }
 
+    public PlayerNumber playerNumber; 
+    Rigidbody2D rigidbod2d;
     bool wasJustClicked = true;
     bool canMove;
     Vector2 playerSize;
+    int playerTouchIndex;
 
     // Use this for initialization
     void Start()
     {
+        playerTouchIndex = playerNumber == PlayerNumber.Player1 ? 0 : 1; 
+        rigidbod2d = GetComponent<Rigidbody2D>();
         playerSize = gameObject.GetComponent<SpriteRenderer>().bounds.extents;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+#if !UNITY_EDITOR
         // Touch input
         if(Input.touchCount > 0)
         {
-            UnityEngine.Touch touch = Input.GetTouch(0);
+            UnityEngine.Touch touch = Input.GetTouch(playerTouchIndex);
             var touchPos = touch.position;
 
             if (touch.phase == TouchPhase.Began)
@@ -41,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (canMove)
                 {
-                    transform.position = touchPos;
+                    rigidbod2d.MovePosition(touchPos);
                 }
             }
         }
@@ -49,10 +61,9 @@ public class PlayerMovement : MonoBehaviour
         {
             canMove = false;
         }
-
-
+#else
         // Mouse Input
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(playerTouchIndex))
         {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -75,12 +86,13 @@ public class PlayerMovement : MonoBehaviour
 
             if (canMove)
             {
-                transform.position = mousePos;
+                rigidbod2d.MovePosition(mousePos);
             }
         }
         else
         {
             wasJustClicked = true;
         }
+#endif
     }
 }
